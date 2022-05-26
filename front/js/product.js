@@ -4,28 +4,29 @@
 /*********************/
 
 // article Elements
-const articleImg = document.getElementsByClassName("item__img");
-const articleTitle = document.getElementById("title");
-const articlePrice = document.getElementById("price");
-const articleDescription = document.getElementById("description");
-const articleColors = document.getElementById("colors");
-
-// button element
-const confirmBtn = document.getElementById("addToCart");
-
-
-/*********************/
-    /* Variables */
-/*********************/
-
-const panierArray = [];
+const retrieveElements = {
+    articleImg: document.getElementsByClassName("item__img"),
+    articleTitle: document.getElementById("title"),
+    articlePrice: document.getElementById("price"),
+    articleDescription: document.getElementById("description"),
+    articleColors: document.getElementById("colors"),
+    // button element
+    confirmBtn: document.getElementById("addToCart"),
+}
 
 
 /*********************/
-    /* Fetch API */
+/* Variables */
 /*********************/
 
-const getIdParam = () => {
+const cartArray = [];
+
+
+/*********************/
+/* Fetch API */
+/*********************/
+
+function getIdParam() {
 
     let url = new URL(window.location.href);
     let search_params = new URLSearchParams(url.search);
@@ -36,20 +37,17 @@ const getIdParam = () => {
     }
 }
 
-const getArticle = () => {
+function getArticle() {
     fetch("http://localhost:3000/api/products/" + getIdParam())
         .then((res) => {
             return res.json();
         })
         .then((jsonArticle) => {
-            addImage(jsonArticle.imageUrl, jsonArticle.altTxt);
-            addTitle(jsonArticle.name);
-            addDescription(jsonArticle.description);
-            addPrice(jsonArticle.price);
+            displayArticle(jsonArticle.imageUrl, jsonArticle.altTxt, jsonArticle.name, jsonArticle.description, jsonArticle.price, jsonArticle.colors);
             addColorOptions(jsonArticle.colors);
         })
         .catch((err) => {
-            console.log("impossible de trouver l'article: " + err);
+            alert("impossible de trouver l'article: " + err);
         })
 }
 
@@ -58,32 +56,22 @@ const getArticle = () => {
 /* Display article in HTML */
 /*********************/
 
-const addImage = (img, alt) => {
+function displayArticle(img, alt, title, description, price) {
     let divImg = document.createElement("img");
     divImg.setAttribute("src", img);
     divImg.setAttribute("alt", alt);
-    articleImg[0].appendChild(divImg);
+    retrieveElements.articleImg[0].appendChild(divImg);
+    retrieveElements.articleTitle.textContent = title;
+    retrieveElements.articleDescription.textContent = description;
+    retrieveElements.articlePrice.textContent = price;
 }
 
-const addTitle = (title) => {
-    articleTitle.textContent = title;
-}
-
-const addDescription = (description) => {
-    articleDescription.textContent = description;
-}
-
-
-const addPrice = (price) => {
-    articlePrice.textContent = price;
-}
-
-const addColorOptions = (colors) => {
+function addColorOptions (colors) {
     for (let i in colors) {
         let divOption = document.createElement("option");
         divOption.setAttribute("value", colors[i]);
         divOption.textContent = colors[i];
-        articleColors.appendChild(divOption);
+        retrieveElements.articleColors.appendChild(divOption);
     }
 }
 
@@ -95,12 +83,11 @@ const addColorOptions = (colors) => {
 getArticle();
 
 
-
 /*********************/
 /* Add to localStorage */
 /*********************/
 
-confirmBtn.addEventListener("click", function(e) {
+confirmBtn.addEventListener("click", function (e) {
     e.preventDefault();
 })
 
