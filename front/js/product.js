@@ -15,15 +15,15 @@ const retrieveElements = {
     confirmBtn: document.getElementById("addToCart"),
 }
 
-/*********************/
-/* Variables */
-/*********************/
-
 let cartArray = [];
+let articleObject = {};
 
 /*********************/
 /* Fetch API */
 /*********************/
+
+// init 
+getArticle();
 
 function getArticle() {
     fetch("http://localhost:3000/api/products/" + getIdParam())
@@ -31,11 +31,18 @@ function getArticle() {
             return res.json();
         })
         .then((jsonArticle) => {
+            articleObject = {
+                id: getIdParam(),
+                price: jsonArticle.price,
+            }
+
             // init quantity to 1
+            retrieveElements.confirmBtn.setAttribute("href", "./index.html");
             retrieveElements.articleQuantity.value = 1;
 
             displayArticle(jsonArticle.imageUrl, jsonArticle.altTxt, jsonArticle.name, jsonArticle.description, jsonArticle.price, jsonArticle.colors);
             addColorOptions(jsonArticle.colors);
+
         })
         .catch((err) => {
             alert("impossible de trouver l'article: " + err);
@@ -48,7 +55,6 @@ function getArticle() {
 /*********************/
 
 function getIdParam() {
-
     let url = new URL(window.location.href);
     let search_params = new URLSearchParams(url.search);
     if (search_params.has('id')) {
@@ -80,11 +86,8 @@ function addColorOptions(colors) {
 // Prepare cart in localstorage
 
 function setCartForLocalStorage() {
-    const articleObject = {
-        id: getIdParam(),
-        quantity: Number(retrieveElements.articleQuantity.value),
-        color: retrieveElements.articleColors[colors.selectedIndex].value,
-    }
+    Object.assign(articleObject, {quantity: Number(retrieveElements.articleQuantity.value)})
+    Object.assign(articleObject, {color: retrieveElements.articleColors[colors.selectedIndex].value})
     if (localStorage.getItem("cart") === null) {
         cartArray.push(articleObject);
         localStorage.setItem("cart", JSON.stringify(cartArray));
@@ -104,12 +107,6 @@ function setCartForLocalStorage() {
 }
 
 
-/*********************/
-/* Init article */
-/*********************/
-
-getArticle();
-
 
 
 
@@ -128,18 +125,11 @@ retrieveElements.articleQuantity.addEventListener("input", function(e) {
 })
 
 
-retrieveElements.confirmBtn.addEventListener("click", function (e) {
-    e.preventDefault();
+retrieveElements.confirmBtn.addEventListener("click", function () {
     if (retrieveElements.articleQuantity.value === "0" ||
         retrieveElements.articleColors[colors.selectedIndex].value === "") {
         return alert("veuillez selectionner une couleur");
     }
     setCartForLocalStorage();
+    window.location.replace("./index.html");
 })
-
-
-
-
-
-
-
