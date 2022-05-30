@@ -54,6 +54,10 @@ function getArticle() {
 /* Functions */
 /*********************/
 
+function saveLocalStorageCart() {
+    return localStorage.setItem("cart", JSON.stringify(cartArray));
+}
+
 function getIdParam() {
     let url = new URL(window.location.href);
     let search_params = new URLSearchParams(url.search);
@@ -90,7 +94,7 @@ function setCartForLocalStorage() {
     Object.assign(articleObject, {color: retrieveElements.articleColors[colors.selectedIndex].value})
     if (localStorage.getItem("cart") === null) {
         cartArray.push(articleObject);
-        localStorage.setItem("cart", JSON.stringify(cartArray));
+        saveLocalStorageCart();
     } else {
         let cartFromStorage = localStorage.getItem("cart");
         cartArray = JSON.parse(cartFromStorage);
@@ -102,7 +106,7 @@ function setCartForLocalStorage() {
             cartArray.push(articleObject);
         }
         cartArray.sort((a, b) => a.id.localeCompare(b.id));
-        localStorage.setItem("cart", JSON.stringify(cartArray));
+        saveLocalStorageCart();
     }
 }
 
@@ -123,7 +127,6 @@ retrieveElements.articleQuantity.addEventListener("input", function(e) {
         retrieveElements.articleQuantity.value = 1;
     }
 })
-
 
 retrieveElements.confirmBtn.addEventListener("click", function () {
     if (retrieveElements.articleQuantity.value === "0" ||

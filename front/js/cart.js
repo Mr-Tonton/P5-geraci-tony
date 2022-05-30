@@ -11,6 +11,7 @@ const retrieveElements = {
     articleColor: document.getElementsByClassName("article-color"),
     articlePrice: document.getElementsByClassName("article-price"),
     articleQuantity: document.getElementsByClassName("itemQuantity"),
+    articleDelete: document.getElementsByClassName("deleteItem"),
 
     totalQuantity: document.getElementById("totalQuantity"),
     totalPrice: document.getElementById("totalPrice"),
@@ -18,14 +19,18 @@ const retrieveElements = {
 
 // Variables
 let totalPrice = 0;
+let cartArray = [];
 
 // init
 getCart();
 
 
+/*********************/
+/* Functions */
+/*********************/
+
 function getCart() {
-    let cartArray = [];
-    cartArray = JSON.parse(localStorage.getItem("cart"));
+    cartArray = getLocalStorageCart();
     if (cartArray !== null) {
         for (let i = 0; i < cartArray.length; i++) {
             generateCartArticle();
@@ -57,10 +62,13 @@ function getCart() {
     } 
 }
 
+function getLocalStorageCart() {
+    return JSON.parse(localStorage.getItem("cart"));
+}
 
-/*********************/
-/* Functions */
-/*********************/
+function saveLocalStorageCart(array) {
+    return localStorage.setItem("cart", JSON.stringify(array));
+}
 
 function generateCartArticle() {
     if ("content" in document.createElement("template")) {
@@ -85,3 +93,49 @@ function calculateTotalPrice(cartArray) {
     }
 }
 
+/*********************/
+/* EVENTS */
+/*********************/
+
+
+// change quantity EVENT.
+for (let i = 0; i < retrieveElements.articleQuantity.length; i++) {
+    retrieveElements.articleQuantity[i].addEventListener("change", (e) => {
+        let qty = Number(e.target.value);
+        if (qty > 100) {
+            qty = 100
+            retrieveElements.articleQuantity[i].value = qty;
+        }
+        if (qty < 1) {
+            qty = 1
+            retrieveElements.articleQuantity[i].value = qty;
+        }
+        cartArray = getLocalStorageCart();
+        let targetedArticle = e.target.closest(".cart__item");
+        let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
+        foundProduct.quantity = qty;
+        calculateTotalArticle(cartArray);
+        calculateTotalPrice(cartArray);
+        saveLocalStorageCart(cartArray);
+})
+}
+
+// delete article EVENT.
+for (let i = 0; i < retrieveElements.articleDelete.length; i++) {
+    retrieveElements.articleDelete[i].addEventListener("click", (e) => {
+        e.preventDefault();
+        cartArray = getLocalStorageCart();
+        let targetedArticle = e.target.closest(".cart__item");
+        let filteredArray = [];
+        let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
+        for (let i = 0; i < cartArray.length; i++) {
+            if (cartArray[i].color !== foundProduct.color && cartArray[i].id !== foundProduct.color) {
+                filteredArray.push(cartArray[i]);
+            }
+        }
+        calculateTotalArticle(filteredArray);
+        calculateTotalPrice(filteredArray);
+        saveLocalStorageCart(filteredArray);
+        location.reload();
+})
+}
