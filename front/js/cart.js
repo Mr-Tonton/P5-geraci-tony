@@ -3,6 +3,7 @@
 /*********************/
 
 const retrieveElements = {
+    // Cart articles
     articleTemplate: document.getElementById("article-template"),
     cartItems: document.getElementById("cart__items"),
     cartItem: document.getElementsByClassName("cart__item"),
@@ -12,14 +13,30 @@ const retrieveElements = {
     articlePrice: document.getElementsByClassName("article-price"),
     articleQuantity: document.getElementsByClassName("itemQuantity"),
     articleDelete: document.getElementsByClassName("deleteItem"),
-
+    // Cart totals
     totalQuantity: document.getElementById("totalQuantity"),
     totalPrice: document.getElementById("totalPrice"),
+    // Cart Form
+    firstName: document.getElementById("firstName"),
+    firstNameErr: document.getElementById("firstNameErrorMsg"),
+    lastName: document.getElementById("lastName"),
+    lastNameErr: document.getElementById("lastNameErrorMsg"),
+    address: document.getElementById("address"),
+    addressErr: document.getElementById("addressErrorMsg"),
+    city: document.getElementById("city"),
+    cityErr: document.getElementById("cityErrorMsg"),
+    email: document.getElementById("email"),
+    emailErr: document.getElementById("emailErrorMsg"),
 }
 
 // Variables
 let totalPrice = 0;
 let cartArray = [];
+let filteredArray = [];
+let nameRegex = /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\- ]+$/;
+let addressRegex = /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\s,'-]+$/;
+let cityRegex = /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\s,'-]+$/;
+let emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
 // init
 getCart();
@@ -45,7 +62,7 @@ function getCart() {
                 })
                 .then((articleData) => {
                     totalPrice += (articleData.price * cartArray[i].quantity);
-
+                    
                     retrieveElements.cartItem[i].setAttribute("data-id", cartArray[i].id);
                     retrieveElements.cartItem[i].setAttribute("data-color", cartArray[i].color);
                     retrieveElements.articleImg[i].setAttribute("src", articleData.imageUrl);
@@ -58,8 +75,8 @@ function getCart() {
                 .catch((err) => {
                     alert("Problème d'affichage des articles: " + err);
                 })
-        }
-    } 
+            }
+        } 
 }
 
 function getLocalStorageCart() {
@@ -91,6 +108,18 @@ function calculateTotalPrice(cartArray) {
         totalPrice += article.price * article.quantity;
         retrieveElements.totalPrice.textContent = totalPrice;
     }
+}
+
+function formatInputEntrie(regex,inputTarget, errorBalise, validMsg, invalidMsg) {
+    if (inputTarget === "") {
+        errorBalise.textContent = "";
+    } else if (regex.test(inputTarget)) {
+            errorBalise.style.color = "rgb(0, 220, 0)";
+            errorBalise.textContent = validMsg;
+        } else {
+            errorBalise.style.color = "rgb(220, 0, 0)";
+            errorBalise.textContent = invalidMsg;
+        }
 }
 
 /*********************/
@@ -126,7 +155,6 @@ for (let i = 0; i < retrieveElements.articleDelete.length; i++) {
         e.preventDefault();
         cartArray = getLocalStorageCart();
         let targetedArticle = e.target.closest(".cart__item");
-        let filteredArray = [];
         let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
         for (let i = 0; i < cartArray.length; i++) {
             if (cartArray[i].color !== foundProduct.color && cartArray[i].id !== foundProduct.color) {
@@ -139,3 +167,31 @@ for (let i = 0; i < retrieveElements.articleDelete.length; i++) {
         location.reload();
 })
 }
+
+// form input EVENT.
+
+retrieveElements.firstName.addEventListener("input", function(e) {
+    let input = e.target.value;
+    formatInputEntrie(nameRegex, input, retrieveElements.firstNameErr,"Prénom valide", "Prénom invalide");
+})
+
+retrieveElements.lastName.addEventListener("input", function(e) {
+    let input = e.target.value;
+    formatInputEntrie(nameRegex, input, retrieveElements.lastNameErr,"Nom valide", "Nom invalide");
+})
+
+retrieveElements.address.addEventListener("input", function(e) {
+    let input = e.target.value;
+    formatInputEntrie(addressRegex, input, retrieveElements.addressErr,"Adresse valide", "Adresse invalide");
+})
+
+retrieveElements.city.addEventListener("input", function(e) {
+    let input = e.target.value;
+    formatInputEntrie(cityRegex, input, retrieveElements.cityErr,"Nom de ville valide", "Nom de vile invalide");
+})
+
+retrieveElements.email.addEventListener("input", function(e) {
+    let input = e.target.value;
+    formatInputEntrie(emailRegex, input, retrieveElements.emailErr,"Email valide", "email invalide, veuillez utiliser un format 'mailtest@test.fr'");
+})
+
