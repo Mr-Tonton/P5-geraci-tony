@@ -2,6 +2,7 @@
 /* Retrieve elements */
 /*********************/
 
+// objet regroupant l'ensemble des récupérations sur le DOM
 const retrieveElements = {
     // Cart articles
     articleTemplate: document.getElementById("article-template"),
@@ -29,30 +30,37 @@ const retrieveElements = {
     emailErr: document.getElementById("emailErrorMsg"),
 }
 
-// Variables
-let totalPrice = 0;
+/*********************/
+/* Variables */
+/*********************/
+
 let cartArray = [];
 let filteredArray = [];
+let arrayOfPrice = [];
+// regex
 let nameRegex = /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\- ]+$/;
 let addressRegex = /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\s,'-]+$/;
 let cityRegex = /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\s,'-]+$/;
 let emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
 
-// init
+
+/*********************/
+/* Initialize API call */
+/*********************/
+
 getCart();
 
 
 /*********************/
-/* Functions */
+/* Fetch API function */
 /*********************/
 
+//  récupère les infos du panier dans le localstorage, génère les articles et calcule la quantité et le prix total
 function getCart() {
     cartArray = getLocalStorageCart();
     if (cartArray !== null) {
         for (let i = 0; i < cartArray.length; i++) {
             generateCartArticle();
-            calculateTotalArticle(cartArray);
-            calculateTotalPrice(cartArray);
 
             fetch("http://localhost:3000/api/products/" + cartArray[i].id)
                 .then((res) => {
@@ -61,8 +69,7 @@ function getCart() {
                     }
                 })
                 .then((articleData) => {
-                    totalPrice += (articleData.price * cartArray[i].quantity);
-                    
+                    arrayOfPrice.push(articleData.price);
                     retrieveElements.cartItem[i].setAttribute("data-id", cartArray[i].id);
                     retrieveElements.cartItem[i].setAttribute("data-color", cartArray[i].color);
                     retrieveElements.articleImg[i].setAttribute("src", articleData.imageUrl);
@@ -71,22 +78,33 @@ function getCart() {
                     retrieveElements.articleColor[i].innerText = cartArray[i].color;
                     retrieveElements.articlePrice[i].innerText = articleData.price + " €";
                     retrieveElements.articleQuantity[i].setAttribute("value", cartArray[i].quantity);
+                    Object.assign(cartArray[i], {price: articleData.price})
                 })
                 .catch((err) => {
                     alert("Problème d'affichage des articles: " + err);
                 })
             }
-        } 
+            calculateTotalArticle(cartArray);
+            // calculateTotalPrice(cartArray);
+    }
 }
 
+
+/*********************/
+/* Functions */
+/*********************/
+
+// récupère le panier (cart) dans le localstorage
 function getLocalStorageCart() {
     return JSON.parse(localStorage.getItem("cart"));
 }
 
+// sauvegarde le panier (cart) dans le localstorage
 function saveLocalStorageCart(array) {
     return localStorage.setItem("cart", JSON.stringify(array));
 }
 
+// vérifie s'il y a bien un template dans cart.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#cart__items"
 function generateCartArticle() {
     if ("content" in document.createElement("template")) {
         let clone = document.importNode(retrieveElements.articleTemplate.content, true);
@@ -94,6 +112,7 @@ function generateCartArticle() {
     }
 }
 
+// calcule le nombre total d'article
 function calculateTotalArticle(cartArray) {
     let totalQty = 0;
     for (let article of cartArray) {
@@ -102,24 +121,26 @@ function calculateTotalArticle(cartArray) {
     }
 }
 
-function calculateTotalPrice(cartArray) {
-    let totalPrice = 0;
-    for(let article of cartArray) {
-        totalPrice += article.price * article.quantity;
-        retrieveElements.totalPrice.textContent = totalPrice;
-    }
-}
+// calcule le prix total
+// function calculateTotalPrice(cartArray) {
+//     let totalPrice = 0;
+//     for (let i = 0; i < cartArray.length; i++) {
+//         totalPrice += 10  * cartArray[i].quantity;
+//         retrieveElements.totalPrice.textContent = totalPrice;
+//     }
+// }
 
-function formatInputEntrie(regex,inputTarget, errorBalise, validMsg, invalidMsg) {
+// formate l'affichage des messages d'erreur ou de validité
+function formatInputEntrie(regex, inputTarget, errorBalise, validMsg, invalidMsg) {
     if (inputTarget === "") {
         errorBalise.textContent = "";
     } else if (regex.test(inputTarget)) {
-            errorBalise.style.color = "rgb(0, 220, 0)";
-            errorBalise.textContent = validMsg;
-        } else {
-            errorBalise.style.color = "rgb(220, 0, 0)";
-            errorBalise.textContent = invalidMsg;
-        }
+        errorBalise.style.color = "rgb(0, 220, 0)";
+        errorBalise.textContent = validMsg;
+    } else {
+        errorBalise.style.color = "rgb(220, 0, 0)";
+        errorBalise.textContent = invalidMsg;
+    }
 }
 
 /*********************/
@@ -127,7 +148,7 @@ function formatInputEntrie(regex,inputTarget, errorBalise, validMsg, invalidMsg)
 /*********************/
 
 
-// change quantity EVENT.
+// traite les cas particuliers liés à l'input (input < 1 && input > 100), récupère le panier, met à jour les infos
 for (let i = 0; i < retrieveElements.articleQuantity.length; i++) {
     retrieveElements.articleQuantity[i].addEventListener("change", (e) => {
         let qty = Number(e.target.value);
@@ -144,12 +165,12 @@ for (let i = 0; i < retrieveElements.articleQuantity.length; i++) {
         let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
         foundProduct.quantity = qty;
         calculateTotalArticle(cartArray);
-        calculateTotalPrice(cartArray);
+        // calculateTotalPrice(cartArray);
         saveLocalStorageCart(cartArray);
-})
+    })
 }
 
-// delete article EVENT.
+// traite la suppression d'un article et enregistre les modifications
 for (let i = 0; i < retrieveElements.articleDelete.length; i++) {
     retrieveElements.articleDelete[i].addEventListener("click", (e) => {
         e.preventDefault();
@@ -162,36 +183,35 @@ for (let i = 0; i < retrieveElements.articleDelete.length; i++) {
             }
         }
         calculateTotalArticle(filteredArray);
-        calculateTotalPrice(filteredArray);
+        // calculateTotalPrice(filteredArray);
         saveLocalStorageCart(filteredArray);
         location.reload();
-})
+    })
 }
 
-// form input EVENT.
-
-retrieveElements.firstName.addEventListener("input", function(e) {
+// traite les inputs du formulaire, et assure la validité des entrées
+retrieveElements.firstName.addEventListener("input", function (e) {
     let input = e.target.value;
-    formatInputEntrie(nameRegex, input, retrieveElements.firstNameErr,"Prénom valide", "Prénom invalide");
+    formatInputEntrie(nameRegex, input, retrieveElements.firstNameErr, "Prénom valide", "Prénom invalide");
 })
 
-retrieveElements.lastName.addEventListener("input", function(e) {
+retrieveElements.lastName.addEventListener("input", function (e) {
     let input = e.target.value;
-    formatInputEntrie(nameRegex, input, retrieveElements.lastNameErr,"Nom valide", "Nom invalide");
+    formatInputEntrie(nameRegex, input, retrieveElements.lastNameErr, "Nom valide", "Nom invalide");
 })
 
-retrieveElements.address.addEventListener("input", function(e) {
+retrieveElements.address.addEventListener("input", function (e) {
     let input = e.target.value;
-    formatInputEntrie(addressRegex, input, retrieveElements.addressErr,"Adresse valide", "Adresse invalide");
+    formatInputEntrie(addressRegex, input, retrieveElements.addressErr, "Adresse valide", "Adresse invalide");
 })
 
-retrieveElements.city.addEventListener("input", function(e) {
+retrieveElements.city.addEventListener("input", function (e) {
     let input = e.target.value;
-    formatInputEntrie(cityRegex, input, retrieveElements.cityErr,"Nom de ville valide", "Nom de vile invalide");
+    formatInputEntrie(cityRegex, input, retrieveElements.cityErr, "Nom de ville valide", "Nom de vile invalide");
 })
 
-retrieveElements.email.addEventListener("input", function(e) {
+retrieveElements.email.addEventListener("input", function (e) {
     let input = e.target.value;
-    formatInputEntrie(emailRegex, input, retrieveElements.emailErr,"Email valide", "email invalide, veuillez utiliser un format 'mailtest@test.fr'");
+    formatInputEntrie(emailRegex, input, retrieveElements.emailErr, "Email valide", "email invalide, veuillez utiliser un format 'mailtest@test.fr'");
 })
 

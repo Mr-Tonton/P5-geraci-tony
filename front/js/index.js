@@ -2,20 +2,21 @@
 /* Retrieve elements */
 /*********************/
 
+// objet regroupant l'ensemble des récupérations sur le DOM
 const retrieveElements = {
-    items : document.getElementById("items"),
-    articleTemplate : document.getElementById("article-template"),
-    articleLink : document.getElementsByClassName("article-link"),
-    articleImg : document.getElementsByClassName("article-img"),
-    productName : document.getElementsByClassName("productName"),
-    productDescription : document.getElementsByClassName("productDescription"),
+    items: document.getElementById("items"),
+    articleTemplate: document.getElementById("article-template"),
+    articleLink: document.getElementsByClassName("article-link"),
+    articleImg: document.getElementsByClassName("article-img"),
+    productName: document.getElementsByClassName("productName"),
+    productDescription: document.getElementsByClassName("productDescription"),
 }
 
 /*********************/
-/* Fetch API */
+/* Fetch API function */
 /*********************/
 
-
+// récupère l'ensemble des articles de l'api via fetch, et les affiche sur la page
 function getArticles() {
     fetch("http://localhost:3000/api/products")
         .then((res) => {
@@ -43,6 +44,7 @@ function getArticles() {
 /* Display in html */
 /*********************/
 
+// vérifie s'il y a bien un template dans index.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#items"
 function generateArticle() {
     if ("content" in document.createElement("template")) {
         let clone = document.importNode(retrieveElements.articleTemplate.content, true);
