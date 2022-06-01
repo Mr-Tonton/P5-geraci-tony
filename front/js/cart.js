@@ -34,7 +34,7 @@ const retrieveElements = {
 /* Variables */
 /*********************/
 
-let cartArray = [];
+let cartArray = getLocalStorageCart();
 let filteredArray = [];
 let arrayOfPrice = [];
 // regex

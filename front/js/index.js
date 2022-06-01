@@ -1,3 +1,6 @@
+// on import la fonction callApiArticles du fichier apiCalls.js
+import { callApiArticles } from "./apiCalls.js/apiCalls.js";
+
 /*********************/
 /* Retrieve elements */
 /*********************/
@@ -5,55 +8,49 @@
 // objet regroupant l'ensemble des récupérations sur le DOM
 const retrieveElements = {
     items: document.getElementById("items"),
-    articleTemplate: document.getElementById("article-template"),
-    articleLink: document.getElementsByClassName("article-link"),
-    articleImg: document.getElementsByClassName("article-img"),
-    productName: document.getElementsByClassName("productName"),
-    productDescription: document.getElementsByClassName("productDescription"),
+    article : {
+        template: document.getElementById("article-template"),
+        link: document.getElementsByClassName("article-link"),
+        img: document.getElementsByClassName("article-img"),
+        name: document.getElementsByClassName("productName"),
+        description: document.getElementsByClassName("productDescription"),
+    },
 }
 
 /*********************/
-/* Fetch API function */
+/* Init */
 /*********************/
 
-// récupère l'ensemble des articles de l'api via fetch, et les affiche sur la page
-function getArticles() {
-    fetch("http://localhost:3000/api/products")
-        .then((res) => {
-            if (res.ok) {
-                return res.json();
-            }
-        })
-        .then((jsonListArticle) => {
+displayArticles();
+
+/*********************/
+/* Functions */
+/*********************/
+
+// génère l'affichage des différents articles sur la page
+function displayArticles() {
+    callApiArticles()
+            .then((jsonListArticle) => {
             for (let i = 0; i < jsonListArticle.length; i++) {
                 generateArticle();
-                retrieveElements.articleLink[i].setAttribute("href", "./product.html?id=" + jsonListArticle[i]._id);
-                retrieveElements.articleImg[i].setAttribute("src", jsonListArticle[i].imageUrl);
-                retrieveElements.articleImg[i].setAttribute("alt", jsonListArticle[i].altTxt);
-                retrieveElements.productName[i].textContent = jsonListArticle[i].name;
-                retrieveElements.productDescription[i].textContent = jsonListArticle[i].description;
+                setArticlesDisplay(i, jsonListArticle);
             }
         })
-        .catch((error) => {
-            alert("Désolé, nous n'arrivons pas à accéder à la liste d'articles : " + error);
-        })
 }
-
-
-/*********************/
-/* Display in html */
-/*********************/
 
 // vérifie s'il y a bien un template dans index.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#items"
 function generateArticle() {
     if ("content" in document.createElement("template")) {
-        let clone = document.importNode(retrieveElements.articleTemplate.content, true);
+        let clone = document.importNode(retrieveElements.article.template.content, true);
         retrieveElements.items.appendChild(clone);
     }
 }
 
-/*********************/
-/* Initialize API call */
-/*********************/
-
-getArticles();
+// traite l'affichage des articles sur la page index.html
+function setArticlesDisplay(iterable, listeArticle) {
+    retrieveElements.article.link[iterable].setAttribute("href", "./product.html?id=" + listeArticle[iterable]._id);
+    retrieveElements.article.img[iterable].setAttribute("src", listeArticle[iterable].imageUrl);
+    retrieveElements.article.img[iterable].setAttribute("alt", listeArticle[iterable].altTxt);
+    retrieveElements.article.name[iterable].textContent = listeArticle[iterable].name;
+    retrieveElements.article.description[iterable].textContent = listeArticle[iterable].description;
+}
