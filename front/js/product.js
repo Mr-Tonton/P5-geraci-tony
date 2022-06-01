@@ -17,7 +17,6 @@ const retrieveElements = {
         quantity: document.getElementById("quantity"),
         alert: document.getElementById("add_article_message"),
         numberDisplay: document.getElementById("numberOfArticle"),
-
     },
 }
 
@@ -41,9 +40,9 @@ displayArticle();
 // génère l'affichage de l'article sur la page
 function displayArticle() {
     callApiArticle(getIdParam())
-    .then((jsonArticle) => {
-        setArticleDisplay(jsonArticle);
-        addColorOptions(jsonArticle.colors);
+    .then((articleData) => {
+        setArticleDisplay(articleData);
+        addColorOptions(articleData.colors);
     })
 }
 
@@ -119,7 +118,6 @@ function addArticleMsg(article) {
     setTimeout(() => {
         retrieveElements.article.alert.classList.remove("add_article_alert");
     }, msgDelay);
-    
 }
 
 /*********************/
