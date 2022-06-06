@@ -1,5 +1,8 @@
 // on import la fonction callApiArticle du fichier apiCalls.js
-import { callApiArticle } from "./apiCalls.js/apiCalls.js";
+import { callApiArticle } from "./otherTools/apiCalls.js";
+
+// on import la fonction getIdParam du fichier utils.js
+import { getIdParam } from "./otherTools/utils.js";
 
 /*********************/
 /* Retrieve elements */
@@ -44,17 +47,6 @@ function displayArticle() {
         setArticleDisplay(articleData);
         addColorOptions(articleData.colors);
     })
-}
-
-// récupère l'id de l'article via les paramètres de l'URL
-function getIdParam() {
-    let url = new URL(window.location.href);
-    let search_params = new URLSearchParams(url.search);
-    if (search_params.has('id')) {
-        return search_params.get('id');
-    } else {
-        console.log("Erreur sur l'id du produit");
-    }
 }
 
 // traite l'affichage sur la page product.html de l'article

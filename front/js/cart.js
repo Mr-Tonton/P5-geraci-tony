@@ -1,5 +1,5 @@
 // on import la fonction callApiArticle du fichier apiCalls.js
-import { callApiArticle } from "./apiCalls.js/apiCalls.js";
+import { callApiArticle, callApiArticles, sendOrder } from "./otherTools/apiCalls.js";
 
 /*********************/
 /* Retrieve elements */
@@ -19,6 +19,7 @@ const retrieveElements = {
         delete: document.getElementsByClassName("deleteItem"),
     },
     form: {
+        container: document.getElementsByClassName("cart__order__form"),
         firstName: document.getElementById("firstName"),
         firstNameErr: document.getElementById("firstNameErrorMsg"),
         lastName: document.getElementById("lastName"),
@@ -29,6 +30,7 @@ const retrieveElements = {
         cityErr: document.getElementById("cityErrorMsg"),
         email: document.getElementById("email"),
         emailErr: document.getElementById("emailErrorMsg"),
+        order: document.getElementById("order"),
     },
     totalQuantity: document.getElementById("totalQuantity"),
     totalPrice: document.getElementById("totalPrice"),
@@ -43,7 +45,7 @@ let cartArray = JSON.parse(localStorage.getItem("cart"));
 let nameRegex = /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\- ]+$/;
 let addressRegex = /^[a-zA-Z0-9áàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\s,'-]+$/;
 let cityRegex = /^[a-zA-ZáàâäãåçéèêëíìîïñóòôöõúùûüýÿæœÁÀÂÄÃÅÇÉÈÊËÍÌÎÏÑÓÒÔÖÕÚÙÛÜÝŸÆŒ\s,'-]+$/;
-let emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/;
+let emailRegex = /^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$/;
 
 /*********************/
 /* Init */
@@ -68,7 +70,9 @@ function displayCart() {
                 alert("Problème d'affichage des articles: " + err);
             })
     }
-    calculateTotalArticle(cartArray);
+    calculateTotalArticle();
+    calculateTotalPrice();
+
 }
 
 // vérifie s'il y a bien un template dans cart.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#cart__items"
@@ -113,16 +117,34 @@ function calculateTotalArticle() {
     retrieveElements.totalQuantity.textContent = totalQty;
 }
 
+// calcule le prix total
+function calculateTotalPrice() {
+    callApiArticles()
+    .then((jsonArticles) => {
+        let totalPrice = 0;
+        for (let product of cartArray) {
+            let articleMatch = jsonArticles.find((p) => p._id === product.id);
+            totalPrice += product.quantity * articleMatch.price;
+        }
+        retrieveElements.totalPrice.textContent = totalPrice;
+    })
+}
+
 // formate l'affichage des messages d'erreur ou de validité
 function formatInputEntrie(regex, inputTarget, errorBalise, validMsg, invalidMsg) {
     if (inputTarget === "") {
         errorBalise.textContent = "";
+        errorBalise.classList.remove("valid", "invalid");
     } else if (regex.test(inputTarget)) {
         errorBalise.style.color = "rgb(0, 220, 0)";
         errorBalise.textContent = validMsg;
+        errorBalise.classList.remove("invalid");
+        errorBalise.classList.add("valid");
     } else {
         errorBalise.style.color = "rgb(220, 0, 0)";
         errorBalise.textContent = invalidMsg;
+        errorBalise.classList.remove("valid");
+        errorBalise.classList.add("invalid");
     }
 }
 
@@ -148,6 +170,7 @@ retrieveElements.article.cartItems.addEventListener("change", (e) => {
             let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
             foundProduct.quantity = qty;
             calculateTotalArticle();
+            calculateTotalPrice()
             saveCart();
         }
     }
@@ -156,13 +179,14 @@ retrieveElements.article.cartItems.addEventListener("change", (e) => {
 // traite la suppression d'un article et enregistre les modifications
 retrieveElements.article.cartItems.addEventListener("click", (e) => {
     for (let deleteBtn of retrieveElements.article.delete) {
-        if (e.target === deleteBtn) {
+        if (e.target === deleteBtn && window.confirm("Voulez vous vraiment supprimer cet article de votre panier ?")) {
             e.preventDefault();
             cartArray = getCart();
             let targetedArticle = e.target.closest(".cart__item");
             let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
             cartArray = cartArray.filter(p => p.color !== foundProduct.color || p.id !== foundProduct.id);
             calculateTotalArticle();
+            calculateTotalPrice();
             saveCart();
             location.reload();
         }
@@ -170,27 +194,39 @@ retrieveElements.article.cartItems.addEventListener("click", (e) => {
 })
 
 // traite les inputs du formulaire, et assure la validité des entrées
-retrieveElements.form.firstName.addEventListener("input", function (e) {
-    let input = e.target.value;
-    formatInputEntrie(nameRegex, input, retrieveElements.form.firstNameErr, "Prénom valide", "Prénom invalide");
+retrieveElements.form.container[0].addEventListener("input", function(e) {
+    let input = e.target;
+    let inputValue = e.target.value;
+    if (input === retrieveElements.form.firstName) formatInputEntrie(nameRegex, inputValue, retrieveElements.form.firstNameErr, "Prénom valide", "Prénom invalide");
+    if (input === retrieveElements.form.lastName) formatInputEntrie(nameRegex, inputValue, retrieveElements.form.lastNameErr, "Nom valide", "Nom invalide");
+    if (input === retrieveElements.form.address) formatInputEntrie(addressRegex, inputValue, retrieveElements.form.addressErr, "Adresse valide", "Adresse invalide");
+    if (input === retrieveElements.form.city) formatInputEntrie(cityRegex, inputValue, retrieveElements.form.cityErr, "Nom de ville valide", "Nom de ville invalide");
+    if (input === retrieveElements.form.email) formatInputEntrie(emailRegex, inputValue, retrieveElements.form.emailErr, "Email valide", "email invalide, veuillez utiliser un format 'mailtest@test.fr'");
 })
 
-retrieveElements.form.lastName.addEventListener("input", function (e) {
-    let input = e.target.value;
-    formatInputEntrie(nameRegex, input, retrieveElements.form.lastNameErr, "Nom valide", "Nom invalide");
-})
-
-retrieveElements.form.address.addEventListener("input", function (e) {
-    let input = e.target.value;
-    formatInputEntrie(addressRegex, input, retrieveElements.form.addressErr, "Adresse valide", "Adresse invalide");
-})
-
-retrieveElements.form.city.addEventListener("input", function (e) {
-    let input = e.target.value;
-    formatInputEntrie(cityRegex, input, retrieveElements.form.cityErr, "Nom de ville valide", "Nom de vile invalide");
-})
-
-retrieveElements.form.email.addEventListener("input", function (e) {
-    let input = e.target.value;
-    formatInputEntrie(emailRegex, input, retrieveElements.form.emailErr, "Email valide", "email invalide, veuillez utiliser un format 'mailtest@test.fr'");
-})
+// traite la validation et l'envoi de la commande
+retrieveElements.form.order.addEventListener("click", function(e) {
+    e.preventDefault();
+    if (retrieveElements.form.firstNameErr.classList.contains("valid") &&
+        retrieveElements.form.lastNameErr.classList.contains("valid") &&
+        retrieveElements.form.addressErr.classList.contains("valid") &&
+        retrieveElements.form.cityErr.classList.contains("valid") &&
+        retrieveElements.form.emailErr.classList.contains("valid")) {
+            
+            let contact = {
+                firstName: retrieveElements.form.firstName.value,
+                lastName: retrieveElements.form.lastName.value,
+                address: retrieveElements.form.address.value,
+                city: retrieveElements.form.city.value,
+                email: retrieveElements.form.email.value
+            }
+            let products = cartArray.map(p => p.id);
+        
+            sendOrder({contact, products})
+            .then(data => {
+                console.log(data);
+                console.log(location);
+                document.location.href = "./confirmation.html?id=" + data.orderId;
+            })
+        }
+});

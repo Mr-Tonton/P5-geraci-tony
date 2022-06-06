@@ -1,5 +1,5 @@
 // on import la fonction callApiArticles du fichier apiCalls.js
-import { callApiArticles } from "./apiCalls.js/apiCalls.js";
+import { callApiArticles } from "./otherTools/apiCalls.js";
 
 /*********************/
 /* Retrieve elements */
