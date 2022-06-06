@@ -100,11 +100,13 @@
 	background-color: rgb(255, 104, 104);
 	border-radius: 10px;
 	border: #000000 1px solid;
+	box-shadow: rgba(0, 0, 0, .5) 5px 5px 5px;
 }
 
 .add_article span {
 	font-size: calc(1.2vmin + 12px);
 	font-weight: bold;
+	text-shadow: rgba(0, 0, 0, .5) 2px 2px 2px;
 }
 
 .add_article_alert {
@@ -112,7 +114,7 @@
 }
 
 @keyframes appear {
-	10%,70% {
+	20%, 60% {
 		right: 3vw;
 	}
 }

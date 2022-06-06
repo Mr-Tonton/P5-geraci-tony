@@ -60,6 +60,7 @@ displayCart();
 // génère l'affichage du panier sur la page
 function displayCart() {
     getCart();
+
     for (let i = 0; i < cartArray.length; i++) {
         generateCartArticle();
         callApiArticle(cartArray[i].id)
@@ -100,6 +101,11 @@ function getCart() {
     if (cartArray === null) {
         cartArray = [];
     }
+    if (cartArray.length === 0) {
+        document.getElementsByTagName("h1")[0].textContent = "Votre panier est vide";
+    } else {
+        document.getElementsByTagName("h1")[0].textContent = "Votre panier";
+    }
     return cartArray.sort((a, b) => a.id.localeCompare(b.id));
 }
 
@@ -134,17 +140,15 @@ function calculateTotalPrice() {
 function formatInputEntrie(regex, inputTarget, errorBalise, validMsg, invalidMsg) {
     if (inputTarget === "") {
         errorBalise.textContent = "";
-        errorBalise.classList.remove("valid", "invalid");
+        errorBalise.classList.remove("valid");
     } else if (regex.test(inputTarget)) {
         errorBalise.style.color = "rgb(0, 220, 0)";
         errorBalise.textContent = validMsg;
-        errorBalise.classList.remove("invalid");
         errorBalise.classList.add("valid");
     } else {
         errorBalise.style.color = "rgb(220, 0, 0)";
         errorBalise.textContent = invalidMsg;
         errorBalise.classList.remove("valid");
-        errorBalise.classList.add("invalid");
     }
 }
 
@@ -187,8 +191,10 @@ retrieveElements.article.cartItems.addEventListener("click", (e) => {
             cartArray = cartArray.filter(p => p.color !== foundProduct.color || p.id !== foundProduct.id);
             calculateTotalArticle();
             calculateTotalPrice();
-            saveCart();
-            location.reload();
+            setTimeout(() => {
+                saveCart();
+                location.reload();
+            }, 300);
         }
     }
 })
@@ -212,7 +218,6 @@ retrieveElements.form.order.addEventListener("click", function(e) {
         retrieveElements.form.addressErr.classList.contains("valid") &&
         retrieveElements.form.cityErr.classList.contains("valid") &&
         retrieveElements.form.emailErr.classList.contains("valid")) {
-            
             let contact = {
                 firstName: retrieveElements.form.firstName.value,
                 lastName: retrieveElements.form.lastName.value,
@@ -226,7 +231,7 @@ retrieveElements.form.order.addEventListener("click", function(e) {
             .then(data => {
                 console.log(data);
                 console.log(location);
-                document.location.href = "./confirmation.html?id=" + data.orderId;
+                // document.location.href = "./confirmation.html?id=" + data.orderId;
             })
         }
 });

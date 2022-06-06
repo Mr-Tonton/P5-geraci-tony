@@ -105,10 +105,15 @@ function addArticleToCart() {
 
 // affiche le message d'ajout au panier avec le nombre d'article ajouté.
 function addArticleMsg(article) {
-    retrieveElements.article.numberDisplay.textContent = article.quantity;
-    retrieveElements.article.alert.classList.add("add_article_alert");
+    let alerteDiv = document.createElement("div");
+    let alerteMsg = document.createElement("p");
+    alerteDiv.classList.add("add_article");
+    alerteMsg.textContent = "Vous avez ajouté " + retrieveElements.article.quantity.value + " article(s) au panier";
+    retrieveElements.confirmBtn.appendChild(alerteDiv);
+    alerteDiv.appendChild(alerteMsg);
+    alerteDiv.classList.add("add_article_alert");
     setTimeout(() => {
-        retrieveElements.article.alert.classList.remove("add_article_alert");
+        alerteDiv.classList.remove("add_article_alert");
     }, msgDelay);
 }
 

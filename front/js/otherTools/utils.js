@@ -2,7 +2,6 @@
 /* Utils */
 /*********************/
 
-
 export function getIdParam() {
     let url = new URL(window.location.href);
     let search_params = new URLSearchParams(url.search);
