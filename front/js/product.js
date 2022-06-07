@@ -1,8 +1,7 @@
 // on import la fonction callApiArticle du fichier apiCalls.js
 import { callApiArticle } from "./otherTools/apiCalls.js";
-
 // on import la fonction getIdParam du fichier utils.js
-import { getIdParam } from "./otherTools/utils.js";
+import { getIdParam, saveCart, addMsg } from "./otherTools/utils.js";
 
 /*********************/
 /* Retrieve elements */
@@ -28,7 +27,6 @@ const retrieveElements = {
 /*********************/
 
 let cartArray = JSON.parse(localStorage.getItem("cart"));
-let msgDelay = 6000;
 
 /*********************/
 /* Init */
@@ -73,16 +71,11 @@ function addColorOptions(colors) {
 }
 
 // récupère le panier (cart) dans le localstorage
-function getCart() {
+function formatCart() {
     if (cartArray === null) {
         cartArray = [];
     }
     return cartArray;
-}
-
-// sauvegarde le panier (cart) dans le localstorage
-function saveCart() {
-    return localStorage.setItem("cart", JSON.stringify(cartArray));
 }
 
 // gère l'ajout d'article et le sauvegarde sur le localstorage
@@ -92,29 +85,15 @@ function addArticleToCart() {
         quantity: Number(retrieveElements.article.quantity.value),
         color: retrieveElements.article.colors[colors.selectedIndex].value,
     }
-    getCart();
+    formatCart();
     let foundProduct = cartArray.find((p) => p.id === articleObject.id && p.color === articleObject.color);
     if (foundProduct !== undefined) {
         foundProduct.quantity += articleObject.quantity;
     } else {
         cartArray.push(articleObject);
     }
-    saveCart();
-    addArticleMsg(articleObject);
-}
-
-// affiche le message d'ajout au panier avec le nombre d'article ajouté.
-function addArticleMsg(article) {
-    let alerteDiv = document.createElement("div");
-    let alerteMsg = document.createElement("p");
-    alerteDiv.classList.add("add_article");
-    alerteMsg.textContent = "Vous avez ajouté " + retrieveElements.article.quantity.value + " article(s) au panier";
-    retrieveElements.confirmBtn.appendChild(alerteDiv);
-    alerteDiv.appendChild(alerteMsg);
-    alerteDiv.classList.add("add_article_alert");
-    setTimeout(() => {
-        alerteDiv.classList.remove("add_article_alert");
-    }, msgDelay);
+    saveCart(cartArray);
+    addMsg("Vous avez ajouté " + articleObject.quantity + " article(s) au panier", retrieveElements.confirmBtn);
 }
 
 /*********************/

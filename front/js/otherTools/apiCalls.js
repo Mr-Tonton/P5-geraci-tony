@@ -26,8 +26,7 @@ export function callApiArticle(id) {
         })
 }
 
-// 
-
+// envoi les infos de la commande et retourne l'idOrder
 export function sendOrder(order) {
     return fetch("http://localhost:3000/api/products/order", {
         method: "POST",

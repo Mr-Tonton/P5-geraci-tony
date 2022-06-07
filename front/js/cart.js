@@ -1,5 +1,7 @@
 // on import la fonction callApiArticle du fichier apiCalls.js
 import { callApiArticle, callApiArticles, sendOrder } from "./otherTools/apiCalls.js";
+// on import la fonction getIdParam du fichier utils.js
+import { saveCart, addMsg } from "./otherTools/utils.js";
 
 /*********************/
 /* Retrieve elements */
@@ -70,11 +72,10 @@ function displayCart() {
             .catch((err) => {
                 alert("Problème d'affichage des articles: " + err);
             })
+        }
+        calculateTotalArticle();
+        calculateTotalPrice();        
     }
-    calculateTotalArticle();
-    calculateTotalPrice();
-
-}
 
 // vérifie s'il y a bien un template dans cart.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#cart__items"
 function generateCartArticle() {
@@ -95,7 +96,6 @@ function setArticlesDisplay(iterable, product) {
     retrieveElements.article.price[iterable].innerText = product.price + " €";
     retrieveElements.article.quantity[iterable].setAttribute("value", cartArray[iterable].quantity);
 }
-
 // récupère le panier (cart) dans le localstorage
 function getCart() {
     if (cartArray === null) {
@@ -107,11 +107,6 @@ function getCart() {
         document.getElementsByTagName("h1")[0].textContent = "Votre panier";
     }
     return cartArray.sort((a, b) => a.id.localeCompare(b.id));
-}
-
-// sauvegarde le panier (cart) dans le localstorage
-function saveCart() {
-    return localStorage.setItem("cart", JSON.stringify(cartArray));
 }
 
 // calcule le nombre total d'article
@@ -174,8 +169,8 @@ retrieveElements.article.cartItems.addEventListener("change", (e) => {
             let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
             foundProduct.quantity = qty;
             calculateTotalArticle();
-            calculateTotalPrice()
-            saveCart();
+            calculateTotalPrice();
+            saveCart(cartArray);
         }
     }
 })
@@ -191,8 +186,8 @@ retrieveElements.article.cartItems.addEventListener("click", (e) => {
             cartArray = cartArray.filter(p => p.color !== foundProduct.color || p.id !== foundProduct.id);
             calculateTotalArticle();
             calculateTotalPrice();
+            saveCart(cartArray);
             setTimeout(() => {
-                saveCart();
                 location.reload();
             }, 300);
         }
@@ -217,7 +212,8 @@ retrieveElements.form.order.addEventListener("click", function(e) {
         retrieveElements.form.lastNameErr.classList.contains("valid") &&
         retrieveElements.form.addressErr.classList.contains("valid") &&
         retrieveElements.form.cityErr.classList.contains("valid") &&
-        retrieveElements.form.emailErr.classList.contains("valid")) {
+        retrieveElements.form.emailErr.classList.contains("valid") &&
+        cartArray.length !== 0) {
             let contact = {
                 firstName: retrieveElements.form.firstName.value,
                 lastName: retrieveElements.form.lastName.value,
@@ -229,9 +225,9 @@ retrieveElements.form.order.addEventListener("click", function(e) {
         
             sendOrder({contact, products})
             .then(data => {
-                console.log(data);
-                console.log(location);
-                // document.location.href = "./confirmation.html?id=" + data.orderId;
+                document.location.href = "./confirmation.html?id=" + data.orderId;
             })
+        } else {
+            addMsg("Veuillez remplir correctement les champs et ne pas avoir un panier vide", retrieveElements.totalQuantity);
         }
 });

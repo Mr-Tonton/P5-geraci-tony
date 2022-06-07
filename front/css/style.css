@@ -214,6 +214,56 @@ footer .footerSecondary {
 }
 
 
+.add_article {
+	font-size: calc(1vmin + 10px);
+	padding: 0 10px;
+	position: fixed;
+	top: 3vh;
+	right: -9999px;
+	background-color: rgb(255, 104, 104);
+	border-radius: 10px;
+	border: #000000 1px solid;
+	box-shadow: rgba(0, 0, 0, .5) 5px 5px 5px;
+}
+
+.add_article_alert {
+	animation: appear 6s;
+}
+
+@keyframes appear {
+	20%, 60% {
+		right: 3vw;
+	}
+}
+
+
+
+/***************/
+/*Media queries*/
+/***************/
+
+@media (max-width: 991.98px) {
+	.item article {
+		width: 70%;
+	}
+	.item__content__settings__color,
+	.item__content__settings__quantity {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+	}
+	.item__content__settings__color {
+		margin-bottom: 26px;
+	}
+}
+
+@media (max-width: 575.98px) { 
+	.item article {
+		width: 90%;
+	}
+}
+
+
 
 
 /***************/
