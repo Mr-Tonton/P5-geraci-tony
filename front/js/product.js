@@ -1,7 +1,7 @@
 // on import la fonction callApiArticle du fichier apiCalls.js
 import { callApiArticle } from "./otherTools/apiCalls.js";
 // on import la fonction getIdParam du fichier utils.js
-import { getIdParam, saveCart, addMsg } from "./otherTools/utils.js";
+import { getUrlParam, saveCart, addMsg } from "./otherTools/utils.js";
 
 /*********************/
 /* Retrieve elements */
@@ -40,7 +40,7 @@ displayArticle();
 
 // génère l'affichage de l'article sur la page
 function displayArticle() {
-    callApiArticle(getIdParam())
+    callApiArticle(getUrlParam("id"))
     .then((articleData) => {
         setArticleDisplay(articleData);
         addColorOptions(articleData.colors);
@@ -81,7 +81,7 @@ function formatCart() {
 // gère l'ajout d'article et le sauvegarde sur le localstorage
 function addArticleToCart() {
     let articleObject = {
-        id: getIdParam(),
+        id: getUrlParam("id"),
         quantity: Number(retrieveElements.article.quantity.value),
         color: retrieveElements.article.colors[colors.selectedIndex].value,
     }
@@ -93,7 +93,7 @@ function addArticleToCart() {
         cartArray.push(articleObject);
     }
     saveCart(cartArray);
-    addMsg("Vous avez ajouté " + articleObject.quantity + " article(s) au panier", retrieveElements.confirmBtn);
+    addMsg("Vous avez ajouté " + articleObject.quantity + " article(s) au panier", document.getElementsByTagName("body")[0], "add_article--valid");
 }
 
 /*********************/

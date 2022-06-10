@@ -3,13 +3,13 @@
 /*********************/
 
 // récupère le paramètre id passé dans l'url
-export function getIdParam() {
+export function getUrlParam(param) {
     let url = new URL(window.location.href);
     let search_params = new URLSearchParams(url.search);
-    if (search_params.has('id')) {
-        return search_params.get('id');
+    if (search_params.has(param)) {
+        return search_params.get(param);
     } else {
-        console.log("Erreur sur l'id du produit");
+        console.log("Erreur sur le paramètre du produit");
     }
 }
 
@@ -19,10 +19,11 @@ export function saveCart(cart) {
 }
 
 // affiche le message d'ajout au panier avec le nombre d'article ajouté.
-export function addMsg(message, elementLocation) {
+export function addMsg(message, elementLocation, statusMsg) {
     let alerteDiv = document.createElement("div");
     let alerteMsg = document.createElement("p");
     alerteDiv.classList.add("add_article");
+    alerteDiv.classList.add(statusMsg);
     alerteMsg.textContent = message;
     elementLocation.appendChild(alerteDiv);
     alerteDiv.appendChild(alerteMsg);

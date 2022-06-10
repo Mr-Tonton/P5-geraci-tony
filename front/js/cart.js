@@ -184,12 +184,10 @@ retrieveElements.article.cartItems.addEventListener("click", (e) => {
             let targetedArticle = e.target.closest(".cart__item");
             let foundProduct = cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
             cartArray = cartArray.filter(p => p.color !== foundProduct.color || p.id !== foundProduct.id);
+            retrieveElements.article.cartItems.removeChild(targetedArticle);
             calculateTotalArticle();
             calculateTotalPrice();
             saveCart(cartArray);
-            setTimeout(() => {
-                location.reload();
-            }, 300);
         }
     }
 })
@@ -225,9 +223,9 @@ retrieveElements.form.order.addEventListener("click", function(e) {
         
             sendOrder({contact, products})
             .then(data => {
-                document.location.href = "./confirmation.html?id=" + data.orderId;
+                document.location.href = "./confirmation.html?orderId=" + data.orderId;
             })
         } else {
-            addMsg("Veuillez remplir correctement les champs et ne pas avoir un panier vide", retrieveElements.totalQuantity);
+            addMsg("Veuillez remplir correctement les champs et ne pas avoir un panier vide", document.getElementsByTagName("body")[0], "add_article--invalid");
         }
 });
