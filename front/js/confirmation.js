@@ -1,6 +1,13 @@
-// on import la fonction getIdParam du fichier utils.js
-import { getUrlParam } from "./otherTools/utils.js";
+import { Utils } from "./class/Utils.js";
 
-const orderIdDisplay = document.getElementById("orderId");
+class Confirmation {
+    constructor() {
+        this.orderIdDisplay = document.getElementById("orderId");
+    }
+    init() {
+        this.orderIdDisplay.textContent = Utils.getUrlParam("orderId");
+    }
+}
 
-orderIdDisplay.textContent = getUrlParam("orderId");
+const confirmation = new Confirmation();
+confirmation.init();
