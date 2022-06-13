@@ -1,10 +1,12 @@
 import { ApiCalls } from "./class/ApiCalls.js";
 import { Utils } from "./class/Utils.js";
+import { Basket } from "./class/Basket.js";
 
 class Product {
     constructor() {
         this.retrieveElements();
         this.cartArray = JSON.parse(localStorage.getItem("cart"));
+        this.basket = new Basket(this.cartArray);
     }
 
     retrieveElements() {
@@ -53,33 +55,6 @@ class Product {
         }
     }
 
-    // récupère le panier (cart) dans le localstorage
-    formatCart() {
-        if (this.cartArray === null) {
-            this.cartArray = [];
-        }
-        return this.cartArray;
-    }
-
-    // gère l'ajout d'article et le sauvegarde sur le localstorage
-    addArticleToCart() {
-        let articleObject = {
-            id: Utils.getUrlParam("id"),
-            quantity: Number(this.article.quantity.value),
-            color: this.article.colors[colors.selectedIndex].value,
-        }
-        this.formatCart();
-        let foundProduct = this.cartArray.find((p) => p.id === articleObject.id && p.color === articleObject.color);
-        if (foundProduct !== undefined) {
-            foundProduct.quantity += articleObject.quantity;
-        } else {
-            this.cartArray.push(articleObject);
-        }
-        Utils.saveCart(this.cartArray);
-        Utils.addMsg("Vous avez ajouté " + articleObject.quantity + " article(s) au panier", document.getElementsByTagName("body")[0], "add_article--valid");
-    }
-
-
     init() {
         this.displayArticle()
         this.initControls();
@@ -103,7 +78,7 @@ class Product {
             if (this.article.colors[colors.selectedIndex].value === "") {
                 return alert("veuillez selectionner une couleur");
             }
-            this.addArticleToCart();
+            this.basket.addArticleToCart(this.cartArray, this.article.quantity.value, this.article.colors, document.getElementsByTagName("body")[0]);
         })
     }
 }

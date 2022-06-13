@@ -13,11 +13,6 @@ export class Utils {
         }
     }
     
-    // sauvegarde le panier (cart) dans le localstorage
-    static saveCart(cart) {
-        return localStorage.setItem("cart", JSON.stringify(cart));
-    }
-    
     // affiche le message d'ajout au panier avec le nombre d'article ajouté.
     static addMsg(message, elementLocation, statusMsg) {
         let alerteDiv = document.createElement("div");

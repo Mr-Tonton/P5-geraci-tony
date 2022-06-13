@@ -1,10 +1,12 @@
 import { ApiCalls } from "./class/ApiCalls.js";
 import { Utils } from "./class/Utils.js";
+import { Basket } from "./class/Basket.js";
 
 class Cart {
     constructor() {
         this.retrieveElements();
         this.setup();
+        this.basket = new Basket();
     }
 
     retrieveElements() {
@@ -48,7 +50,8 @@ class Cart {
 
     // génère l'affichage du panier sur la page
     displayCart() {
-        this.getCart();
+        this.cartArray = this.basket.formatCart(this.cartArray);
+        this.cartArray = this.basket.sortCart(this.cartArray);
 
         for (let i = 0; i < this.cartArray.length; i++) {
             this.generateCartArticle();
@@ -60,8 +63,8 @@ class Cart {
                     alert("Problème d'affichage des articles: " + err);
                 })
         }
-        this.calculateTotalArticle();
-        this.calculateTotalPrice();
+        this.basket.calculateTotalArticle(this.cartArray, document.getElementsByTagName("h1")[0], this.totalQuantity);
+        this.basket.calculateTotalPrice(this.cartArray, this.totalPrice);
     }
 
     // vérifie s'il y a bien un template dans cart.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#cart__items"
@@ -82,42 +85,6 @@ class Cart {
         this.article.color[iterable].innerText = this.cartArray[iterable].color;
         this.article.price[iterable].innerText = product.price + " €";
         this.article.quantity[iterable].setAttribute("value", this.cartArray[iterable].quantity);
-    }
-    // récupère le panier (cart) dans le localstorage
-    getCart() {
-        if (this.cartArray === null) {
-            this.cartArray = [];
-        }
-        return this.cartArray.sort((a, b) => a.id.localeCompare(b.id));
-    }
-
-    // calcule le nombre total d'article
-    calculateTotalArticle() {
-        let totalQty = 0;
-        for (let product of this.cartArray) {
-            totalQty += product.quantity;
-        }
-
-        if (totalQty === 0) {
-            document.getElementsByTagName("h1")[0].textContent = "Votre panier est vide";
-        } else {
-            document.getElementsByTagName("h1")[0].textContent = "Votre panier";
-        }
-
-        this.totalQuantity.textContent = totalQty;
-    }
-
-    // calcule le prix total
-    calculateTotalPrice() {
-        ApiCalls.callApiArticles()
-            .then((jsonArticles) => {
-                let totalPrice = 0;
-                for (let product of this.cartArray) {
-                    let articleMatch = jsonArticles.find((p) => p._id === product.id);
-                    totalPrice += product.quantity * articleMatch.price;
-                }
-                this.totalPrice.textContent = totalPrice;
-            })
     }
 
     // formate l'affichage des messages d'erreur ou de validité
@@ -155,13 +122,13 @@ class Cart {
                         qty = 1;
                         inputQty.value = qty;
                     }
-                    this.getCart();
+                    this.cartArray = this.basket.formatCart(this.cartArray);
                     let targetedArticle = e.target.closest(".cart__item");
                     let foundProduct = this.cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
                     foundProduct.quantity = qty;
-                    this.calculateTotalArticle();
-                    this.calculateTotalPrice();
-                    Utils.saveCart(this.cartArray);
+                    this.basket.calculateTotalArticle(this.cartArray, document.getElementsByTagName("h1")[0], this.totalQuantity);
+                    this.basket.calculateTotalPrice(this.cartArray, this.totalPrice);
+                    this.basket.saveCart(this.cartArray);
                 }
             }
         })
@@ -171,14 +138,14 @@ class Cart {
             for (let deleteBtn of this.article.delete) {
                 if (e.target === deleteBtn && window.confirm("Voulez vous vraiment supprimer cet article de votre panier ?")) {
                     e.preventDefault();
-                    this.cartArray = this.getCart();
+                    this.basket.formatCart(this.cartArray);
                     let targetedArticle = e.target.closest(".cart__item");
                     let foundProduct = this.cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
                     this.cartArray = this.cartArray.filter(p => p.color !== foundProduct.color || p.id !== foundProduct.id);
                     this.article.cartItems.removeChild(targetedArticle);
-                    this.calculateTotalArticle();
-                    this.calculateTotalPrice();
-                    Utils.saveCart(this.cartArray);
+                    this.basket.calculateTotalArticle(this.cartArray, document.getElementsByTagName("h1")[0], this.totalQuantity);
+                    this.basket.calculateTotalPrice(this.cartArray, this.totalPrice);
+                    this.basket.saveCart(this.cartArray);
                 }
             }
         })
