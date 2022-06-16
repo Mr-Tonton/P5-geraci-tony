@@ -1,33 +1,23 @@
 export class ApiCalls {
-    constructor() {
+
+    // Retourne l'url de base de l'api
+    static url = () => {
+        return "http://localhost:3000/api/products/";
     }
-    // récupère l'ensemble des articles de l'api via fetch
-    static callApiArticles = () => {
-        return fetch("http://localhost:3000/api/products")
+
+    // Requête de type "GET" via fetch pour récupérer le ou les articles
+    static get = (path = "") => {
+        return fetch(this.url() + path)
             .then((res) => {
                 if (res.ok) {
                     return res.json();
                 }
             })
-            .catch((error) => {
-                alert("Désolé, nous n'arrivons pas à accéder à la liste d'articles : " + error);
-            })
     }
 
-    // récupère les infos de l'article sélectionné via l'api
-    static callApiArticle = (id) => {
-        return fetch("http://localhost:3000/api/products/" + id)
-            .then((res) => {
-                return res.json();
-            })
-            .catch((err) => {
-                alert("impossible de trouver l'article: " + err);
-            })
-    }
-
-    // envoi les infos de la commande et retourne l'idOrder
-    static sendOrder = (order) => {
-        return fetch("http://localhost:3000/api/products/order", {
+    // Requête de type "POST" via fetch pour envoyer les infos de la commande et retourne l'idOrder
+    static post = (order, path = "") => {
+        return fetch(this.url() + path ,  {
             method: "POST",
             headers: {
                 "Accept": "application/json",

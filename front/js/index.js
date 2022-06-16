@@ -1,12 +1,16 @@
 import { ApiCalls } from "./class/ApiCalls.js";
 
+
 class Index {
     constructor() {
         this.retrieveElements();
+        this.displayArticles();
     }
 
+    // Récupère les différents éléments sur le DOM
     retrieveElements() {
         this.items = document.getElementById("items");
+        
         this.article = {
             template: document.getElementById("article-template"),
             link: document.getElementsByClassName("article-link"),
@@ -16,18 +20,21 @@ class Index {
         }
     }
 
-    // génère l'affichage des différents articles sur la page
+    // Génère l'affichage des différents articles sur la page
     displayArticles() {
-        ApiCalls.callApiArticles()
+        ApiCalls.get()
             .then((jsonListArticle) => {
                 for (let i = 0; i < jsonListArticle.length; i++) {
                     this.generateArticle();
-                    this.setArticlesDisplay(i, jsonListArticle);
+                    this.setArticlesDisplay(i, jsonListArticle[i]);
                 }
+            })
+            .catch((err) => {
+                alert("Il y a un problème pour afficher l'ensemble des articles : " + err);
             })
     }
 
-    // vérifie s'il y a bien un template dans index.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#items"
+    // Vérifie s'il y a bien un template dans index.html. S'il est présent crée un clone de ce template et l'insère dans la div parent "#items"
     generateArticle() {
         if ("content" in document.createElement("template")) {
             let clone = document.importNode(this.article.template.content, true);
@@ -35,19 +42,14 @@ class Index {
         }
     }
 
-    // traite l'affichage des articles sur la page index.html
+    // Traite l'affichage des articles sur la page index.html
     setArticlesDisplay(iterable, listeArticle) {
-        this.article.link[iterable].setAttribute("href", "./product.html?id=" + listeArticle[iterable]._id);
-        this.article.img[iterable].setAttribute("src", listeArticle[iterable].imageUrl);
-        this.article.img[iterable].setAttribute("alt", listeArticle[iterable].altTxt);
-        this.article.name[iterable].textContent = listeArticle[iterable].name;
-        this.article.description[iterable].textContent = listeArticle[iterable].description;
-    }
-
-    init() {
-        this.displayArticles();
+        this.article.link[iterable].setAttribute("href", "./product.html?id=" + listeArticle._id);
+        this.article.img[iterable].setAttribute("src", listeArticle.imageUrl);
+        this.article.img[iterable].setAttribute("alt", listeArticle.altTxt);
+        this.article.name[iterable].textContent = listeArticle.name;
+        this.article.description[iterable].textContent = listeArticle.description;
     }
 }
 
-const index = new Index();
-index.init();
+new Index();
