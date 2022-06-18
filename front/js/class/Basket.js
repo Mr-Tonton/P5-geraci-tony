@@ -28,6 +28,12 @@ export class Basket {
         this.cartArray = this.cartArray.sort((a, b) => a.id.localeCompare(b.id));
     }
 
+    // Vide le panier une fois la commande validée
+    clearCart() {
+        this.cartArray = [];
+        this.saveCart();
+    }
+
     // Gère l'ajout d'article et le sauvegarde dans le localstorage
     addArticleToCart(quantityValue, colorsEntries) {
         this.formatCart();

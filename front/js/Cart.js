@@ -196,6 +196,7 @@ class Cart {
 
                 ApiCalls.post({ contact, products }, "order")
                     .then(data => {
+                        this.basket.clearCart();
                         document.location.href = "./confirmation.html?orderId=" + data.orderId;
                     })
             } else {
