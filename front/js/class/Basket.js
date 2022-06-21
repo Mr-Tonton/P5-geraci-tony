@@ -45,6 +45,9 @@ export class Basket {
         let foundProduct = this.cartArray.find((p) => p.id === articleObject.id && p.color === articleObject.color);
         if (foundProduct !== undefined) {
             foundProduct.quantity += articleObject.quantity;
+            if (foundProduct.quantity > 100) {
+                foundProduct.quantity = 100;
+            }
         } else {
             this.cartArray.push(articleObject);
         }

@@ -16,7 +16,7 @@ class Cart {
     retrieveElements() {
         this.totalQuantity = document.getElementById("totalQuantity");
         this.totalPrice = document.getElementById("totalPrice");
-        
+
         this.article = {
             template: document.getElementById("article-template"),
             cartItems: document.getElementById("cart__items"),
@@ -28,7 +28,7 @@ class Cart {
             quantity: document.getElementsByClassName("itemQuantity"),
             delete: document.getElementsByClassName("deleteItem"),
         };
-        
+
         this.form = {
             container: document.getElementsByClassName("cart__order__form"),
             firstName: document.getElementById("firstName"),
@@ -126,11 +126,14 @@ class Cart {
         this.article.cartItems.addEventListener("change", (e) => {
             for (let inputQty of this.article.quantity) {
                 if (e.target === inputQty) {
-                    let qty = Number(e.target.value);
+                    let qty = Math.round(e.target.value);
+                    inputQty.value = qty;
+                    qty = Math.round(qty);
                     if (qty > 100) {
                         qty = 100;
-                        inputQty.value = qty;
+                        inputQty.value = 100;
                     }
+
                     if (qty < 1) {
                         qty = 1;
                         inputQty.value = qty;
