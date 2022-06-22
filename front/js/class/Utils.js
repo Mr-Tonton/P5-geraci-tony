@@ -1,6 +1,6 @@
 export class Utils {
 
-    // Récupère le paramètre de l'URL
+    // Récupère le paramètre sélectionné de l'URL
     static getUrlParam(param) {
         let searchParams = new URLSearchParams(new URL(window.location.href).search);
         if (searchParams.has(param)) {
@@ -9,8 +9,8 @@ export class Utils {
             console.log("Erreur sur le paramètre du produit");
         }
     }
-    
-    // Affiche le message d'ajout au panier avec le nombre d'article ajouté.
+
+    // Affiche un message pop-up personnalisé.
     static addMsg(message, statusMsg) {
         let alerteDiv = document.createElement("div");
         alerteDiv.classList.add("add_article");

@@ -1,4 +1,5 @@
 import { ApiCalls } from "./class/ApiCalls.js";
+import { Utils } from "./class/Utils.js";
 
 
 class Index {
@@ -10,7 +11,7 @@ class Index {
     // Récupère les différents éléments sur le DOM
     retrieveElements() {
         this.items = document.getElementById("items");
-        
+
         this.article = {
             template: document.getElementById("article-template"),
             link: document.getElementsByClassName("article-link"),
@@ -30,7 +31,7 @@ class Index {
                 }
             })
             .catch((err) => {
-                alert("Il y a un problème pour afficher l'ensemble des articles : " + err);
+                Utils.addMsg("Il y a un problème pour afficher l'ensemble des articles: " + err, "add_article--invalid")
             })
     }
 

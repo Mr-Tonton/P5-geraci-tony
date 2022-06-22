@@ -62,7 +62,7 @@ class Product {
         }
     }
 
-
+    
     // Gère les Events
     initControls() {
 
@@ -78,12 +78,11 @@ class Product {
             }
         })
 
-        // Traite le cas particulier d'une couleur non sélectionnée. Si valide, envoie le panier sur le localstorage
+        // Traite le cas particulier d'une couleur non sélectionnée. Si valide, envoie l'article dans le panier sur le localstorage
         this.confirmBtn.addEventListener("click", () => {
             if (this.article.colors[colors.selectedIndex].value === "") {
                 return alert("veuillez selectionner une couleur");
             }
-            this.basket.formatCart();
             let foundProduct = this.basket.cartArray.find((p) => p.id === Utils.getUrlParam("id") && p.color === this.article.colors[colors.selectedIndex].value);
             if (foundProduct === undefined) {
                 foundProduct = {
@@ -91,7 +90,7 @@ class Product {
                     color: this.article.colors[colors.selectedIndex].value,
                 }
             }
-            this.basket.addArticleToCart(this.article.quantity.value, this.article.colors);
+            this.basket.addArticleToCart(Utils.getUrlParam("id"), this.article.quantity.value, this.article.colors[colors.selectedIndex].value);
             Utils.addMsg("Votre panier contient " + foundProduct.quantity + " " + this.article.title.innerText + " de couleur " + foundProduct.color, "add_article--valid");
         })
     }

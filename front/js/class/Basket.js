@@ -1,4 +1,3 @@
-import { Utils } from "./Utils.js";
 import { ApiCalls } from "./ApiCalls.js";
 
 
@@ -7,20 +6,13 @@ export class Basket {
         if (self.instance) {
             throw new Error();
         }
-
-        this.cartArray = JSON.parse(localStorage.getItem("cart"));
+        // "??" = Nullish coalescing operator
+        this.cartArray = JSON.parse(localStorage.getItem("cart")) ?? [];
     }
 
     // Sauvegarde le panier (cart) dans le localstorage
     saveCart() {
         localStorage.setItem("cart", JSON.stringify(this.cartArray));
-    }
-
-    // Récupère le panier (cart) dans le localstorage
-    formatCart() {
-        if (this.cartArray === null) {
-            this.cartArray = [];
-        }
     }
 
     // Tri le panier (cart) par ID
@@ -35,12 +27,11 @@ export class Basket {
     }
 
     // Gère l'ajout d'article et le sauvegarde dans le localstorage
-    addArticleToCart(quantityValue, colorsEntries) {
-        this.formatCart();
+    addArticleToCart(idValue, quantityValue, colorsEntries) {
         let articleObject = {
-            id: Utils.getUrlParam("id"),
+            id: idValue,
             quantity: Number(quantityValue),
-            color: colorsEntries[colors.selectedIndex].value,
+            color: colorsEntries,
         }
         let foundProduct = this.cartArray.find((p) => p.id === articleObject.id && p.color === articleObject.color);
         if (foundProduct !== undefined) {
@@ -76,7 +67,7 @@ export class Basket {
             })
     }
 
-    // Permet de respecter le design pattern "Singleton", instanciation de la classe une seule fois
+    // Permet de respecter le design pattern "Singleton", instanciation de la classe une seule fois (pas de vrai méthode singleton en JS, variante)
     static get() {
         if (!self.instance) {
             self.instance = new Basket();

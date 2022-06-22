@@ -55,7 +55,6 @@ class Cart {
 
     // Génère l'affichage du panier sur la page
     displayCart() {
-        this.basket.formatCart();
         this.basket.sortCart();
         this.basket.saveCart();
         for (let i = 0; i < this.basket.cartArray.length; i++) {
@@ -65,7 +64,7 @@ class Cart {
                     this.setArticlesDisplay(i, articleData);
                 })
                 .catch((err) => {
-                    alert("Problème d'affichage des articles: " + err);
+                    Utils.addMsg("Problème d'affichage des articles: " + err + " ", "add_article--invalid");
                 })
         }
         this.basket.calculateTotalArticle(this.totalQuantity);
@@ -138,7 +137,6 @@ class Cart {
                         qty = 1;
                         inputQty.value = qty;
                     }
-                    this.basket.formatCart();
                     let targetedArticle = e.target.closest(".cart__item");
                     let foundProduct = this.basket.cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
                     foundProduct.quantity = qty;
@@ -155,7 +153,6 @@ class Cart {
             for (let deleteBtn of this.article.delete) {
                 if (e.target === deleteBtn && window.confirm("Voulez vous vraiment supprimer cet article de votre panier ?")) {
                     e.preventDefault();
-                    this.basket.formatCart();
                     let targetedArticle = e.target.closest(".cart__item");
                     let foundProduct = this.basket.cartArray.find((p) => p.id === targetedArticle.dataset.id && p.color === targetedArticle.dataset.color);
                     this.basket.cartArray = this.basket.cartArray.filter(p => p.color !== foundProduct.color || p.id !== foundProduct.id);
@@ -164,6 +161,7 @@ class Cart {
                     this.basket.calculateTotalPrice(this.totalPrice);
                     this.displayEmptyCartMsg();
                     this.basket.saveCart();
+                    Utils.addMsg("Vous avez supprimé cet article de votre panier", "add_article--valid");
                 }
             }
         });
